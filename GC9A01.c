@@ -1,8 +1,7 @@
 #include "main.h"
-
+//https://github.com/yaroslav8765
 GC9A01_DrawPropTypeDef lcdprop;
 extern volatile uint8_t dma_spi_fl1;
-//uint8_t screen_buf[65536] = {0};
 uint8_t shift = 0;
 colors current_text_color;
 
@@ -591,8 +590,8 @@ void GC9A01_String(uint16_t x,uint16_t y, char *str)
 {
 	uint8_t lenght = strlen(str);
 	uint8_t step = x;
-	if((lenght + 2) * lcdprop.pFont->Width > LCD_W - x){
-		for(uint8_t i = 0; i != (((LCD_W - x)/lcdprop.pFont->Width-2)); i++){
+	if((lenght ) * lcdprop.pFont->Width > (X_END_POS - x ) ){
+		for(uint8_t i = 0; i != ((((X_END_POS - x )  )/lcdprop.pFont->Width)); i++){
 			GC9A01_DrawChar(step,y,str[i]);
 			step+=lcdprop.pFont->Width;
 		}
@@ -698,7 +697,7 @@ void GC9A01_Rainbow_String(uint16_t x,uint16_t y, char *str)
 
 
 
-void ShowMenu(struct MenuMember Members[8],uint8_t page_num){
+void ShowMenu(struct MenuMember Members[AMOUNT_OF_MENU_MEMBERS],uint8_t page_num){
 	
 	char str[1];
 	char page[1];
@@ -747,14 +746,14 @@ void refresh_menu_member(struct MenuMember Members, uint8_t pos){
 	
 }
 
-void menu_active_member_running_text_animation(struct MenuMember Members[8], uint8_t pos){
+void menu_active_member_running_text_animation(struct MenuMember Members[AMOUNT_OF_MENU_MEMBERS], uint8_t pos){
 	
 	uint8_t active_pos = get_active_menu_member(Members);
 	char str[256];	
 	sprintf(str, "%d.%s %d.%s ", Members[active_pos].number,Members[active_pos].text,		\
 	Members[active_pos].number,Members[active_pos].text);			
 	uint8_t lenght = strlen(str);
-	uint8_t capacity = ((LCD_W - X_POS)/(lcdprop.pFont->Width));
+	uint8_t capacity = ((X_END_POS - X_POS)/(lcdprop.pFont->Width));
 	
 	if(lenght < 2*(capacity)){
 		//end

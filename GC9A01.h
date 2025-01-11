@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f4xx_ll_spi.h"
+//https://github.com/yaroslav8765
 /***************************************CONFIG PINS, SPI and DMA*************************************************/
 
 
@@ -128,6 +129,7 @@
 /********************MENU PARAMETRS******************/
 #define X_POS 35
 #define Y_POS 25
+#define X_END_POS 205
 #define STEP 6
 #define AMOUNT_OF_MENU_MEMBERS 8
 /****************************************************/
@@ -193,9 +195,9 @@ void GC9A01_DrawChar(uint16_t x, uint16_t y, uint8_t c);
 void GC9A01_String(uint16_t x,uint16_t y, char *str);
 void GC9A01_Text(char *str,uint8_t page);
 void GC9A01_Rainbow_String(uint16_t x,uint16_t y, char *str);
-void ShowMenu(struct MenuMember Members[7],uint8_t page_num);
+void ShowMenu(struct MenuMember Members[AMOUNT_OF_MENU_MEMBERS - 1],uint8_t page_num);
 void refresh_menu_member(struct MenuMember Members, uint8_t pos);
-uint8_t get_active_menu_member(struct MenuMember Members[8]);
+uint8_t get_active_menu_member(struct MenuMember Members[AMOUNT_OF_MENU_MEMBERS]);
 uint8_t chek_menu_member_for_the_file_type(struct MenuMember Member, char *str);
-void menu_active_member_running_text_animation(struct MenuMember Members[8], uint8_t pos);
+void menu_active_member_running_text_animation(struct MenuMember Members[AMOUNT_OF_MENU_MEMBERS], uint8_t pos);
 
