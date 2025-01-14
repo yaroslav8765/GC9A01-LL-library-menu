@@ -1,11 +1,15 @@
 #include "main.h"
+
+
 //https://github.com/yaroslav8765
-GC9A01_DrawPropTypeDef lcdprop;
+volatile GC9A01_DrawPropTypeDef lcdprop;
 extern volatile uint8_t dma_spi_fl1;
-uint8_t shift = 0;
-colors current_text_color;
+volatile uint8_t shift = 0;
+volatile colors current_text_color;
 
 /************************************basic display fuctions start************************************/
+#pragma push
+#pragma O0
 
 void SPI_write(uint8_t data) {
 	while(!LL_SPI_IsActiveFlag_TXE(SPI_NO)) {}
@@ -13,6 +17,7 @@ void SPI_write(uint8_t data) {
   while(!LL_SPI_IsActiveFlag_RXNE(SPI_NO)) {}
   LL_SPI_ReceiveData8(SPI_NO);
 }
+
 
 void GC9A01_Write_Cmd_Data (uint8_t CMDP)
 {
@@ -33,10 +38,11 @@ void GC9A01_Write_Cmd(uint8_t CMD)
 
 	LCD_CS_1;
 }
+#pragma pop
 
 void GC9A01_Write_Data_U16(uint16_t y)
 {
-	uint16_t m,n;
+	volatile uint16_t m,n;
 	m=y>>8;
 	n=y;
 	
@@ -63,21 +69,22 @@ void GC9A01_Write_Bytes(uint8_t * pbuff, uint16_t size)
 	LL_DMA_DisableStream(DMA_NO, DMA_STREAM);
 	LL_DMA_SetDataLength(DMA_NO, DMA_STREAM, size);
 	LL_DMA_EnableIT_TC(DMA_NO, DMA_STREAM);
-	LL_DMA_ClearFlag_TC3(DMA_NO);
-	LL_DMA_ClearFlag_TE3(DMA_NO);
+	LL_DMA_ClearFlag_TC(DMA_NO);
+	LL_DMA_ClearFlag_TE(DMA_NO);
 	LL_DMA_ConfigAddresses(	DMA_NO, DMA_STREAM, 																	\
 													(uint32_t)pbuff, 																				\
 													LL_SPI_DMA_GetRegAddr(SPI_NO),														\
 													LL_DMA_GetDataTransferDirection(DMA_NO, DMA_STREAM)	\
 												);	
-	LL_DMA_EnableStream(DMA2, DMA_STREAM);
-	while (!dma_spi_fl1) {};
-	LL_DMA_DisableStream(DMA2, DMA_STREAM);
+	LL_DMA_EnableStream(DMA_NO, DMA_STREAM);
+	while (!dma_spi_fl1) {  __asm__ volatile("nop");};
+	LL_DMA_DisableStream(DMA_NO, DMA_STREAM);
 			
 	dma_spi_fl1 = 0;
 
 	LCD_CS_1;
 }
+
 
 void GC9A01_Initial(void)
 {
@@ -398,7 +405,7 @@ void GC9A01_ClearWindow(uint8_t startX, uint8_t startY, uint8_t endX, uint8_t en
  	}
  }
  
-void GC9A01_show_picture(uint16_t *picture, uint16_t x, uint16_t y, uint16_t b, uint16_t h, uint8_t width, uint8_t height)
+void GC9A01_show_picture(uint16_t *picture, uint16_t x, uint16_t y, uint8_t width, uint8_t height)
 {
     int32_t i;
     uint8_t *pPic;
@@ -408,8 +415,8 @@ void GC9A01_show_picture(uint16_t *picture, uint16_t x, uint16_t y, uint16_t b, 
     uint32_t loopNum = (totalSize - (totalSize % bufSize)) / bufSize;
     uint32_t modNum = totalSize % bufSize;
 
-    GC9A01_SetPos(x, y, (x + b) - 1, (y + h) - 1);
-    GC9A01_inversPicData(picture, b, h);
+    GC9A01_SetPos(x, y, (x + width) - 1, (y + height) - 1);
+    GC9A01_inversPicData(picture, width, height);
 
     pPic = (uint8_t *)picture;
 
@@ -417,7 +424,7 @@ void GC9A01_show_picture(uint16_t *picture, uint16_t x, uint16_t y, uint16_t b, 
         GC9A01_Write_Bytes(pPic + i * bufSize, bufSize);
     }
     GC9A01_Write_Bytes(pPic + i * bufSize, modNum);
-    GC9A01_inversPicData(picture, b, h);
+    GC9A01_inversPicData(picture, width, height);
 
     return;
 }

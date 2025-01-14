@@ -7,39 +7,143 @@ If you want to port this library, modify the functions in `GC9A01.c` (lines 10 t
 
 ---
 
-## Setup  
+## Setup
 
-If you are using the GC9A01 driver, edit the following lines in `GC9A01.h`:  
+1. **Open CubeMX**  
+   Select your MCU. On the **Connectivity** tab, enable SPI in *Transmit Master Only* mode:
 
-```c
-#define LCD_RST_1 LL_GPIO_SetOutputPin(RES_GPIO_Port, RES_Pin) // Set LCD reset pin high  
-#define LCD_RST_0 LL_GPIO_ResetOutputPin(RES_GPIO_Port, RES_Pin) // Set LCD reset pin low  
+   ![SPI Mode](https://github.com/user-attachments/assets/51039e09-256a-4dc6-b274-c347436b4c47)
 
-#define LCD_CS_1 LL_GPIO_SetOutputPin(CS_GPIO_Port, CS_Pin) // Set chip select pin high  
-#define LCD_CS_0 LL_GPIO_ResetOutputPin(CS_GPIO_Port, CS_Pin) // Set chip select pin low  
+2. **Enable DMA**  
 
-#define LCD_DC_1 LL_GPIO_SetOutputPin(DC_GPIO_Port, DC_Pin) // Set data/command pin high  
-#define LCD_DC_0 LL_GPIO_ResetOutputPin(DC_GPIO_Port, DC_Pin) // Set data/command pin low  
+   ![Enable DMA](https://github.com/user-attachments/assets/1d377596-fc8c-45c8-a1f2-8f04eb9eda57)
 
-#define SPI_NO SPI1 // Define the SPI instance used  
-#define DMA_NO DMA2 // Define the DMA instance used  
-#define DMA_STREAM LL_DMA_STREAM_3 // Define the DMA stream used
- 
-```
+3. **Setup Pins**  
+   Configure the pins as output, as shown below (or use different pins, but match their names):
 
-Replace the above definitions if you are using different SPI, DMA, or GPIO pins. For example, here are the pins I used in my configuration:
+   ![Pin Configuration](https://github.com/user-attachments/assets/bad27748-8c4b-4ae5-8d81-c85806b9d11a)
 
-```c
-#define DC_Pin LL_GPIO_PIN_2
-#define DC_GPIO_Port GPIOA  
+4. **Switch to LL Drivers**  
+   In **Project Manager → Advanced Settings**, select **LL** instead of **HAL**:
 
-#define RES_Pin LL_GPIO_PIN_3  
-#define RES_GPIO_Port GPIOA  
+   ![Select LL](https://github.com/user-attachments/assets/96d48e5b-b4dc-4f88-a0c9-8f0d5a3013ff)
 
-#define CS_Pin LL_GPIO_PIN_10  
-#define CS_GPIO_Port GPIOB  
+5. **Other Project Properties**  
 
-```
+   ![Other Properties](https://github.com/user-attachments/assets/083c37fe-305a-44f2-9038-c6b5eecd7d56)
+
+6. **Copy Library Files**  
+   Open the project folder and copy the following files:
+   - `GC9A01.h` and `fonts.h` → `Core/Inc/`
+   - `GC9A01.c`, `font8.c`, `font12.c`, `font16.c`, `font20.c`, and `font24.c` → `Core/Src/`
+
+   ![Copy Headers](https://github.com/user-attachments/assets/61fba6eb-89b1-493c-bbea-ea3cff2a92fa)  
+   ![Copy Sources](https://github.com/user-attachments/assets/9c055c67-9f0d-46c7-8eb6-d0f2c6356b92)
+
+7. **Add Files to the Project**  
+   Open Keil and add the files to your project:
+
+   ![Add Files to Keil](https://github.com/user-attachments/assets/b13f29ab-4fbe-4228-9dae-7db7801f4f0f)
+
+8. **Include Header Files**  
+   Open `main.h` and include the following headers:
+   ```c
+   #include "stdio.h"
+   #include "stdlib.h"
+   #include "string.h"
+   #include "math.h"
+   #include "fonts.h"
+   #include "GC9A01.h"
+   ```
+   ![Include Headers](https://github.com/user-attachments/assets/57bcd08f-5ec2-4718-904a-96e611f42161)
+
+9. **Declare Variables**  
+   In `main.c`, declare this variable:
+   ```c
+   volatile uint8_t dma_spi_fl1 = 0;
+   ```
+   ![Declare Variable](https://github.com/user-attachments/assets/b1dde559-17c3-43ef-a9ee-644d4dc7df0d)
+
+10. **Handle DMA Flags**  
+    Open `stm32f4xx_it.c` and declare the variable as `extern`:
+    ```c
+    extern volatile uint8_t dma_spi_fl1;
+    ```
+    ![Extern Variable](https://github.com/user-attachments/assets/a6da9981-7a6f-417e-b837-f5d643de0b39)
+
+    Paste this code in your **DMA IRQ Handler**:
+    ```c
+    if (LL_DMA_IsActiveFlag_TC(DMA_NO) == 1) {
+        LL_DMA_ClearFlag_TC(DMA_NO);
+        dma_spi_fl1 = 1;
+    } else if (LL_DMA_IsActiveFlag_TE(DMA_NO) == 1) {
+        LL_DMA_ClearFlag_TE(DMA_NO);
+        Error_Handler();
+    }
+    ```
+    ![DMA Handler](https://github.com/user-attachments/assets/cac4b32d-ca1e-4025-bef4-88fc43f0fe62)
+
+11. **Configure GC9A01**  
+    In `GC9A01.h`, fill in these lines correctly:
+    ```c
+    #define LCD_RST_1 LL_GPIO_SetOutputPin(RES_GPIO_Port, RES_Pin) // LCD reset pin high
+    #define LCD_RST_0 LL_GPIO_ResetOutputPin(RES_GPIO_Port, RES_Pin) // LCD reset pin low
+
+    #define LCD_CS_1 LL_GPIO_SetOutputPin(CS_GPIO_Port, CS_Pin) // LCD chip select high
+    #define LCD_CS_0 LL_GPIO_ResetOutputPin(CS_GPIO_Port, CS_Pin) // LCD chip select low
+
+    #define LCD_DC_1 LL_GPIO_SetOutputPin(DC_GPIO_Port, DC_Pin) // Data/Command pin high
+    #define LCD_DC_0 LL_GPIO_ResetOutputPin(DC_GPIO_Port, DC_Pin) // Data/Command pin low
+
+    #define SPI_NO SPI1 // SPI instance
+    #define DMA_NO DMA2 // DMA instance
+    #define DMA_STREAM LL_DMA_STREAM_3 // DMA stream
+
+    #define LL_DMA_ClearFlag_TC LL_DMA_ClearFlag_TC3 // Adjust for your stream
+    #define LL_DMA_ClearFlag_TE LL_DMA_ClearFlag_TE3
+    #define LL_DMA_IsActiveFlag_TC LL_DMA_IsActiveFlag_TC3
+    #define LL_DMA_IsActiveFlag_TE LL_DMA_IsActiveFlag_TE3
+    ```
+
+12. **Update `main.c`**  
+    Add these initializations in your **main function**:
+    ```c
+    /* USER CODE BEGIN Init */
+    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
+    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+
+    NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+    NVIC_SetPriority(SysTick_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
+    /* USER CODE END Init */
+    ```
+
+    And this:
+    ```c
+    /* USER CODE BEGIN 2 */
+    LL_DMA_DisableStream(DMA_NO, DMA_STREAM);
+    LL_DMA_ClearFlag_TC(DMA_NO);
+    LL_DMA_ClearFlag_TE(DMA_NO);
+    LL_DMA_EnableIT_TC(DMA_NO, DMA_STREAM);
+    LL_DMA_EnableIT_TE(DMA_NO, DMA_STREAM);
+    LL_SPI_EnableDMAReq_TX(SPI_NO);
+    LL_SPI_Enable(SPI_NO);
+    /* USER CODE END 2 */
+    ```
+
+13. **Test the Library**  
+    Verify functionality with this code:
+    ```c
+    GC9A01_Initial();
+    GC9A01_ClearScreen(WHITE);
+    GC9A01_SetBackColor(BLACK);
+    GC9A01_SetFont(&Font16);
+    GC9A01_Text("Hello world", 1);
+    GC9A01_DrawCircle(120, 120, 60, BLUE);
+    ```
+    ![Test Output](https://github.com/user-attachments/assets/39050295-68b2-4a38-a09f-e0064e6e2a08)
+
+
+
 
 ## MAIN FUNCTIONS:
 ---

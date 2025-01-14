@@ -17,7 +17,10 @@
 #define DMA_NO DMA2																										//Which DMA do you use
 #define DMA_STREAM LL_DMA_STREAM_3																		//Which DMA stream do you use
 
-
+#define LL_DMA_ClearFlag_TC LL_DMA_ClearFlag_TC3											//Replace 3 with DMA stream you use
+#define LL_DMA_ClearFlag_TE LL_DMA_ClearFlag_TE3
+#define LL_DMA_IsActiveFlag_TC LL_DMA_IsActiveFlag_TC3
+#define LL_DMA_IsActiveFlag_TE LL_DMA_IsActiveFlag_TE3
 /****************************************************************************************************************/
 
 
@@ -182,7 +185,7 @@ void GC9A01_Initial(void);
 void GC9A01_ClearScreen(uint16_t bColor);
 void GC9A01_ClearWindow(uint8_t startX, uint8_t startY, uint8_t endX, uint8_t endY, uint16_t bColor);
 void GC9A01_SetPos(uint8_t Xstart, uint8_t Ystart, uint8_t Xend, uint8_t Yend);
-void GC9A01_show_picture(uint16_t *picture, uint16_t x,uint16_t y,uint16_t b,uint16_t h, uint8_t widht, uint8_t height);
+void GC9A01_show_picture(uint16_t *picture, uint16_t x,uint16_t y, uint8_t widht, uint8_t height);
 void GC9A01_DrawPixel_2x2(uint8_t x, uint8_t y, uint16_t color);
 void GC9A01_draw_line(uint16_t color, uint16_t x1, uint16_t y1,uint16_t x2, uint16_t y2);
 void GC9A01_DrawRect(uint16_t color, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
