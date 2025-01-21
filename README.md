@@ -5,6 +5,8 @@ This is a lightweight library for working with the GC9A01 display driver. It inc
 
 If you want to port this library, modify the functions in `GC9A01.c` (lines 10 to 342). Most of this section contains initialization code, so adapting it should not be overly complex.  
 
+Video guide how to setup this lib:https://youtu.be/KfaOByap_fw
+
 ---
 
 ## Setup
