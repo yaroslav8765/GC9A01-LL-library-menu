@@ -7,6 +7,8 @@ If you want to port this library, modify the functions in `GC9A01.c` (lines 10 t
 
 Video guide how to setup this lib:https://youtu.be/KfaOByap_fw
 
+Example of project with this lib:https://github.com/yaroslav8765/GC9A01_LL_Library_and_USB_file_manager
+
 ---
 
 ## Setup
