@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f4xx_ll_spi.h"
+#define M_PI 3.14159265358979323846
 //https://github.com/yaroslav8765
 /***************************************CONFIG PINS, SPI and DMA*************************************************/
 
@@ -126,15 +127,15 @@
 #define default_text_color BLACK
 #define default_background_color WHITE
 #define default_active_color GREEN
-#define default_font &Font20
+#define default_font &Font16
 /****************************************************/
 
 /********************MENU PARAMETRS******************/
-#define X_POS 35
+#define X_POS 50
 #define Y_POS 25
-#define X_END_POS 205
+#define X_END_POS 240
 #define STEP 6
-#define AMOUNT_OF_MENU_MEMBERS 8
+#define AMOUNT_OF_MENU_MEMBERS 5
 /****************************************************/
 
 /********************TEXT POSITION*******************/
@@ -186,11 +187,29 @@ void GC9A01_ClearScreen(uint16_t bColor);
 void GC9A01_ClearWindow(uint8_t startX, uint8_t startY, uint8_t endX, uint8_t endY, uint16_t bColor);
 void GC9A01_SetPos(uint8_t Xstart, uint8_t Ystart, uint8_t Xend, uint8_t Yend);
 void GC9A01_show_picture(uint16_t *picture, uint16_t x,uint16_t y, uint8_t widht, uint8_t height);
-void GC9A01_DrawPixel_2x2(uint8_t x, uint8_t y, uint16_t color);
-void GC9A01_draw_line(uint16_t color, uint16_t x1, uint16_t y1,uint16_t x2, uint16_t y2);
+void GC9A01_DrawPixel(uint8_t x, uint8_t y, uint16_t color);
+void GC9A01_draw_line(uint16_t color, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t thickness);
 void GC9A01_DrawRect(uint16_t color, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 void GC9A01_DrawCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color);
-void GC9A01_FilledDrawCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color);
+
+void DrawArrow(int16_t angle, uint8_t lineLen, uint8_t thick, uint16_t color);
+void DrawLineAroundTheCircle(int16_t angle, uint8_t r1,uint8_t r2, uint8_t thick, uint16_t color);
+void GC9A01A_FillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+void GC9A01_Draw_Triangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3, uint16_t color);
+void GC9A01_FillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color);
+
+void DrawTriangleArrow(	int16_t 	angle, 								uint8_t lineLen, 			uint8_t thick,													\
+												uint16_t 	color, 								uint8_t base_lenght, 	uint16_t back_tail_angle,								\
+												uint8_t 	imaginable_circle_R);
+
+void GC9A01_FillCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color);
+
+void GC9A01_DrawCircleArountTheCircle(uint16_t start_pos,	int16_t angle, 																							\
+																			uint8_t r,					uint8_t distance_to_center, uint16_t color);
+
+void GC9A01_GradientScale(uint32_t min_value,uint32_t max_value, uint32_t value);
+void GC9A01_FillCircleFast(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color);
+
 void GC9A01_SetTextColor(uint16_t color);
 void GC9A01_SetBackColor(uint16_t color);
 void GC9A01_SetFont(sFONT *pFonts);
